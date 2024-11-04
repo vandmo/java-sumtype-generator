@@ -1,0 +1,14 @@
+.*.swp
+.junk/
+*~
+.vscode/
+pom.xml.versionsBackup
+.checkstyle
+.classpath
+.idea/
+.project
+.settings/
+*.iml
+target/
+node_modules/
+/*.class

@@ -1,3 +1,7 @@
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 public abstract class Integrity {
 
   private static final Integrity.Folder Folder = new Folder();
@@ -24,7 +28,7 @@ public abstract class Integrity {
   public final static class Calculated extends Integrity {
     public final String checksum;
     private Calculated(String checksum) {
-      this.checksum = java.util.Objects.requireNonNull(checksum);
+      this.checksum = Objects.requireNonNull(checksum);
     }
     @Override
     public String toString() {
@@ -39,17 +43,15 @@ public abstract class Integrity {
       }
       if (o instanceof Integrity.Calculated) {
         Integrity.Calculated that = (Integrity.Calculated) o;
-        return true
-          && this.checksum.equals(that.checksum)
+        return
+          this.checksum.equals(that.checksum)
           ;
       }
       return false;
     }
     @Override
     public int hashCode() {
-      return java.util.Objects.hash(854935006
-          , this.checksum
-      );
+      return Objects.hash(854935006, this.checksum);
     }
   }
 
@@ -57,14 +59,14 @@ public abstract class Integrity {
     public final String checksum;
     public final int flurp;
     private CalculatedX(String checksum, int flurp) {
-      this.checksum = java.util.Objects.requireNonNull(checksum);
+      this.checksum = Objects.requireNonNull(checksum);
       this.flurp = flurp;
     }
     @Override
     public String toString() {
       return "CalculatedX{"
         + "checksum=" + checksum
-        + "flurp=" + flurp
+        + ",flurp=" + flurp
         + "}";
     }
     @Override
@@ -74,8 +76,8 @@ public abstract class Integrity {
       }
       if (o instanceof Integrity.CalculatedX) {
         Integrity.CalculatedX that = (Integrity.CalculatedX) o;
-        return true
-          && this.checksum.equals(that.checksum)
+        return
+          this.checksum.equals(that.checksum)
           && this.flurp == that.flurp
           ;
       }
@@ -83,10 +85,7 @@ public abstract class Integrity {
     }
     @Override
     public int hashCode() {
-      return java.util.Objects.hash(733181498
-          , this.checksum
-          , this.flurp
-      );
+      return Objects.hash(733181498, this.checksum, this.flurp);
     }
   }
 
@@ -104,16 +103,13 @@ public abstract class Integrity {
         return true;
       }
       if (o instanceof Integrity.Folder) {
-        Integrity.Folder that = (Integrity.Folder) o;
-        return true
-          ;
+        return true;
       }
       return false;
     }
     @Override
     public int hashCode() {
-      return java.util.Objects.hash(2109868174
-      );
+      return Objects.hash(2109868174);
     }
   }
 
@@ -131,16 +127,13 @@ public abstract class Integrity {
         return true;
       }
       if (o instanceof Integrity.Polder) {
-        Integrity.Polder that = (Integrity.Polder) o;
-        return true
-          ;
+        return true;
       }
       return false;
     }
     @Override
     public int hashCode() {
-      return java.util.Objects.hash(1898807612
-      );
+      return Objects.hash(1898807612);
     }
   }
 
@@ -150,49 +143,49 @@ public abstract class Integrity {
   public final class Matching_Calculated<T> {
     private Matching_Calculated() {
     }
-    public Matching_CalculatedX<T> Calculated(java.util.function.Function<Calculated, T> matcher) {
-      return new Matching_CalculatedX<T>(java.util.Objects.requireNonNull(matcher));
+    public Matching_CalculatedX<T> Calculated(Function<Calculated, T> matcher) {
+      return new Matching_CalculatedX<T>(Objects.requireNonNull(matcher));
     }
   }
   public final class Matching_CalculatedX<T> {
-    private final java.util.function.Function<Calculated, T> Calculated_matcher;
-    private Matching_CalculatedX(java.util.function.Function<Calculated, T> Calculated_matcher) {
+    private final Function<Calculated, T> Calculated_matcher;
+    private Matching_CalculatedX(Function<Calculated, T> Calculated_matcher) {
       this.Calculated_matcher = Calculated_matcher;
     }
-    public Matching_Folder<T> CalculatedX(java.util.function.Function<CalculatedX, T> matcher) {
-      return new Matching_Folder<T>(Calculated_matcher, java.util.Objects.requireNonNull(matcher));
+    public Matching_Folder<T> CalculatedX(Function<CalculatedX, T> matcher) {
+      return new Matching_Folder<T>(Calculated_matcher, Objects.requireNonNull(matcher));
     }
   }
   public final class Matching_Folder<T> {
-    private final java.util.function.Function<Calculated, T> Calculated_matcher;
-    private final java.util.function.Function<CalculatedX, T> CalculatedX_matcher;
-    private Matching_Folder(java.util.function.Function<Calculated, T> Calculated_matcher, java.util.function.Function<CalculatedX, T> CalculatedX_matcher) {
+    private final Function<Calculated, T> Calculated_matcher;
+    private final Function<CalculatedX, T> CalculatedX_matcher;
+    private Matching_Folder(Function<Calculated, T> Calculated_matcher, Function<CalculatedX, T> CalculatedX_matcher) {
       this.Calculated_matcher = Calculated_matcher;
       this.CalculatedX_matcher = CalculatedX_matcher;
     }
-    public Matching_Polder<T> Folder(java.util.function.Function<Folder, T> matcher) {
-      return new Matching_Polder<T>(Calculated_matcher, CalculatedX_matcher, java.util.Objects.requireNonNull(matcher));
+    public Matching_Polder<T> Folder(Function<Folder, T> matcher) {
+      return new Matching_Polder<T>(Calculated_matcher, CalculatedX_matcher, Objects.requireNonNull(matcher));
     }
   }
   public final class Matching_Polder<T> {
-    private final java.util.function.Function<Calculated, T> Calculated_matcher;
-    private final java.util.function.Function<CalculatedX, T> CalculatedX_matcher;
-    private final java.util.function.Function<Folder, T> Folder_matcher;
-    private Matching_Polder(java.util.function.Function<Calculated, T> Calculated_matcher, java.util.function.Function<CalculatedX, T> CalculatedX_matcher, java.util.function.Function<Folder, T> Folder_matcher) {
+    private final Function<Calculated, T> Calculated_matcher;
+    private final Function<CalculatedX, T> CalculatedX_matcher;
+    private final Function<Folder, T> Folder_matcher;
+    private Matching_Polder(Function<Calculated, T> Calculated_matcher, Function<CalculatedX, T> CalculatedX_matcher, Function<Folder, T> Folder_matcher) {
       this.Calculated_matcher = Calculated_matcher;
       this.CalculatedX_matcher = CalculatedX_matcher;
       this.Folder_matcher = Folder_matcher;
     }
-    public FinalMatching<T> Polder(java.util.function.Function<Polder, T> matcher) {
-      return new FinalMatching<T>(Calculated_matcher, CalculatedX_matcher, Folder_matcher, java.util.Objects.requireNonNull(matcher));
+    public FinalMatching<T> Polder(Function<Polder, T> matcher) {
+      return new FinalMatching<T>(Calculated_matcher, CalculatedX_matcher, Folder_matcher, Objects.requireNonNull(matcher));
     }
   }
   public final class FinalMatching<T> {
-    private final java.util.function.Function<Calculated, T> Calculated_matcher;
-    private final java.util.function.Function<CalculatedX, T> CalculatedX_matcher;
-    private final java.util.function.Function<Folder, T> Folder_matcher;
-    private final java.util.function.Function<Polder, T> Polder_matcher;
-    private FinalMatching(java.util.function.Function<Calculated, T> Calculated_matcher, java.util.function.Function<CalculatedX, T> CalculatedX_matcher, java.util.function.Function<Folder, T> Folder_matcher, java.util.function.Function<Polder, T> Polder_matcher) {
+    private final Function<Calculated, T> Calculated_matcher;
+    private final Function<CalculatedX, T> CalculatedX_matcher;
+    private final Function<Folder, T> Folder_matcher;
+    private final Function<Polder, T> Polder_matcher;
+    private FinalMatching(Function<Calculated, T> Calculated_matcher, Function<CalculatedX, T> CalculatedX_matcher, Function<Folder, T> Folder_matcher, Function<Polder, T> Polder_matcher) {
       this.Calculated_matcher = Calculated_matcher;
       this.CalculatedX_matcher = CalculatedX_matcher;
       this.Folder_matcher = Folder_matcher;
@@ -220,49 +213,49 @@ public abstract class Integrity {
   public final class Visiting_Calculated {
     private Visiting_Calculated() {
     }
-    public Visiting_CalculatedX Calculated(java.util.function.Consumer<Calculated> visitor) {
-      return new Visiting_CalculatedX(java.util.Objects.requireNonNull(visitor));
+    public Visiting_CalculatedX Calculated(Consumer<Calculated> visitor) {
+      return new Visiting_CalculatedX(Objects.requireNonNull(visitor));
     }
   }
   public final class Visiting_CalculatedX {
-    private final java.util.function.Consumer<Calculated> Calculated_visitor;
-    private Visiting_CalculatedX(java.util.function.Consumer<Calculated> Calculated_visitor) {
+    private final Consumer<Calculated> Calculated_visitor;
+    private Visiting_CalculatedX(Consumer<Calculated> Calculated_visitor) {
       this.Calculated_visitor = Calculated_visitor;
     }
-    public Visiting_Folder CalculatedX(java.util.function.Consumer<CalculatedX> visitor) {
-      return new Visiting_Folder(Calculated_visitor, java.util.Objects.requireNonNull(visitor));
+    public Visiting_Folder CalculatedX(Consumer<CalculatedX> visitor) {
+      return new Visiting_Folder(Calculated_visitor, Objects.requireNonNull(visitor));
     }
   }
   public final class Visiting_Folder {
-    private final java.util.function.Consumer<Calculated> Calculated_visitor;
-    private final java.util.function.Consumer<CalculatedX> CalculatedX_visitor;
-    private Visiting_Folder(java.util.function.Consumer<Calculated> Calculated_visitor, java.util.function.Consumer<CalculatedX> CalculatedX_visitor) {
+    private final Consumer<Calculated> Calculated_visitor;
+    private final Consumer<CalculatedX> CalculatedX_visitor;
+    private Visiting_Folder(Consumer<Calculated> Calculated_visitor, Consumer<CalculatedX> CalculatedX_visitor) {
       this.Calculated_visitor = Calculated_visitor;
       this.CalculatedX_visitor = CalculatedX_visitor;
     }
-    public Visiting_Polder Folder(java.util.function.Consumer<Folder> visitor) {
-      return new Visiting_Polder(Calculated_visitor, CalculatedX_visitor, java.util.Objects.requireNonNull(visitor));
+    public Visiting_Polder Folder(Consumer<Folder> visitor) {
+      return new Visiting_Polder(Calculated_visitor, CalculatedX_visitor, Objects.requireNonNull(visitor));
     }
   }
   public final class Visiting_Polder {
-    private final java.util.function.Consumer<Calculated> Calculated_visitor;
-    private final java.util.function.Consumer<CalculatedX> CalculatedX_visitor;
-    private final java.util.function.Consumer<Folder> Folder_visitor;
-    private Visiting_Polder(java.util.function.Consumer<Calculated> Calculated_visitor, java.util.function.Consumer<CalculatedX> CalculatedX_visitor, java.util.function.Consumer<Folder> Folder_visitor) {
+    private final Consumer<Calculated> Calculated_visitor;
+    private final Consumer<CalculatedX> CalculatedX_visitor;
+    private final Consumer<Folder> Folder_visitor;
+    private Visiting_Polder(Consumer<Calculated> Calculated_visitor, Consumer<CalculatedX> CalculatedX_visitor, Consumer<Folder> Folder_visitor) {
       this.Calculated_visitor = Calculated_visitor;
       this.CalculatedX_visitor = CalculatedX_visitor;
       this.Folder_visitor = Folder_visitor;
     }
-    public FinalVisiting Polder(java.util.function.Consumer<Polder> visitor) {
-      return new FinalVisiting(Calculated_visitor, CalculatedX_visitor, Folder_visitor, java.util.Objects.requireNonNull(visitor));
+    public FinalVisiting Polder(Consumer<Polder> visitor) {
+      return new FinalVisiting(Calculated_visitor, CalculatedX_visitor, Folder_visitor, Objects.requireNonNull(visitor));
     }
   }
   public final class FinalVisiting {
-    private final java.util.function.Consumer<Calculated> Calculated_visitor;
-    private final java.util.function.Consumer<CalculatedX> CalculatedX_visitor;
-    private final java.util.function.Consumer<Folder> Folder_visitor;
-    private final java.util.function.Consumer<Polder> Polder_visitor;
-    private FinalVisiting(java.util.function.Consumer<Calculated> Calculated_visitor, java.util.function.Consumer<CalculatedX> CalculatedX_visitor, java.util.function.Consumer<Folder> Folder_visitor, java.util.function.Consumer<Polder> Polder_visitor) {
+    private final Consumer<Calculated> Calculated_visitor;
+    private final Consumer<CalculatedX> CalculatedX_visitor;
+    private final Consumer<Folder> Folder_visitor;
+    private final Consumer<Polder> Polder_visitor;
+    private FinalVisiting(Consumer<Calculated> Calculated_visitor, Consumer<CalculatedX> CalculatedX_visitor, Consumer<Folder> Folder_visitor, Consumer<Polder> Polder_visitor) {
       this.Calculated_visitor = Calculated_visitor;
       this.CalculatedX_visitor = CalculatedX_visitor;
       this.Folder_visitor = Folder_visitor;

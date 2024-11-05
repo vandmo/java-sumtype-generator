@@ -24,16 +24,13 @@ public abstract class WithPackage {
         return true;
       }
       if (o instanceof WithPackage.Folder) {
-        WithPackage.Folder that = (WithPackage.Folder) o;
-        return true
-          ;
+        return true;
       }
       return false;
     }
     @Override
     public int hashCode() {
-      return java.util.Objects.hash(2109868174
-      );
+      return java.util.Objects.hash(2109868174);
     }
   }
 

@@ -2,6 +2,7 @@ public final class IntegrityTest {
 
   public static void main(String[] args) {
     Integrity i = Integrity.CalculatedX("hejhoj", 0);
+    System.out.println(i);
     String s = i.<String>matching()
       .Calculated(c -> "c")
       .CalculatedX(c -> "d")

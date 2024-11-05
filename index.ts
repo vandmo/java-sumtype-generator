@@ -5,6 +5,7 @@ type Schema = {
   packageName?: string
   name: string
   types: Record<string, Record<string, string>>
+  imports?: "all" | "none"
 }
 
 const PRIMITIVE_TYPES = new Set(["boolean", "byte", "char", "short", "int", "long", "float", "double"])
@@ -24,12 +25,29 @@ const createSumType = (schema: Schema) => {
   const emit = (s: string) => {
     result += `${s}\n`
   }
-  const { packageName, name, types } = schema
+  const { packageName, name, types, imports } = schema
   const typeNames: string[] = Object.keys(types)
 
-  if (packageName !== undefined) {
-    emit(`package ${packageName};`)
-    emit("")
+  const imported = new Set<string>()
+  let Consumer: () => string
+  let Function: () => string
+  let Objects: () => string
+  if (imports === undefined || imports === "none") {
+    Consumer = () => "java.util.function.Consumer"
+    Function = () => "java.util.function.Function"
+    Objects = () => "java.util.Objects"
+  } else if (imports === "all") {
+    const makeImporter = (P, S) => {
+      return () => {
+        imported.add(`${P}.${S}`)
+        return S
+      }
+    }
+    Consumer = makeImporter("java.util.function", "Consumer")
+    Function = makeImporter("java.util.function", "Function")
+    Objects = makeImporter("java.util", "Objects")
+  } else {
+    throw new Error(`Unsupported imports value: '${imports}'`)
   }
 
   emit(`public abstract class ${name} {`)
@@ -46,14 +64,14 @@ const createSumType = (schema: Schema) => {
   emit("")
 
   for (const [type, fields] of Object.entries(types)) {
-    const params = Object.entries(fields)
-      .map(([fieldName, fieldType]) => `${fieldType} ${fieldName}`)
-      .join(", ")
+    const fieldNames = Object.keys(fields)
+    const fieldEntries = Object.entries(fields)
+    const params = fieldEntries.map(([fieldName, fieldType]) => `${fieldType} ${fieldName}`).join(", ")
     emit(`  public static ${name}.${type} ${type}(${params}) {`)
-    if (Object.keys(fields).length === 0) {
+    if (fieldNames.length === 0) {
       emit(`    return ${type};`)
     } else {
-      const args = Object.keys(fields).join(", ")
+      const args = fieldNames.join(", ")
       emit(`    return new ${type}(${args});`)
     }
     emit("  }")
@@ -61,21 +79,21 @@ const createSumType = (schema: Schema) => {
   }
 
   for (const [type, fields] of Object.entries(types)) {
+    const fieldNames = Object.keys(fields)
+    const fieldEntries = Object.entries(fields)
     emit(`  public final static class ${type} extends ${name} {`)
     for (const [fieldName, fieldType] of Object.entries(fields)) {
       emit(`    public final ${fieldType} ${fieldName};`)
     }
-    const params = Object.entries(fields)
-      .map(([fieldName, fieldType]) => `${fieldType} ${fieldName}`)
-      .join(", ")
+    const params = fieldEntries.map(([fieldName, fieldType]) => `${fieldType} ${fieldName}`).join(", ")
 
     // constructor(...)
     emit(`    private ${type}(${params}) {`)
-    for (const [fieldName, fieldType] of Object.entries(fields)) {
+    for (const [fieldName, fieldType] of fieldEntries) {
       if (PRIMITIVE_TYPES.has(fieldType)) {
         emit(`      this.${fieldName} = ${fieldName};`)
       } else {
-        emit(`      this.${fieldName} = java.util.Objects.requireNonNull(${fieldName});`)
+        emit(`      this.${fieldName} = ${Objects()}.requireNonNull(${fieldName});`)
       }
     }
     emit("    }")
@@ -84,8 +102,10 @@ const createSumType = (schema: Schema) => {
     emit("    @Override")
     emit("    public String toString() {")
     emit(`      return "${type}{"`)
-    for (const fieldName of Object.keys(fields)) {
-      emit(`        + "${fieldName}=" + ${fieldName}`)
+    for (let i = 0; i < fieldNames.length; ++i) {
+      const fieldName = fieldNames[i]
+      const maybeComma = i === 0 ? "" : ","
+      emit(`        + "${maybeComma}${fieldName}=" + ${fieldName}`)
     }
     emit('        + "}";')
     emit("    }")
@@ -97,16 +117,22 @@ const createSumType = (schema: Schema) => {
     emit("        return true;")
     emit("      }")
     emit(`      if (o instanceof ${name}.${type}) {`)
-    emit(`        ${name}.${type} that = (${name}.${type}) o;`)
-    emit("        return true")
-    for (const [fieldName, fieldType] of Object.entries(fields)) {
-      if (PRIMITIVE_TYPES.has(fieldType)) {
-        emit(`          && this.${fieldName} == that.${fieldName}`)
-      } else {
-        emit(`          && this.${fieldName}.equals(that.${fieldName})`)
+    if (fieldEntries.length === 0) {
+      emit("        return true;")
+    } else {
+      emit(`        ${name}.${type} that = (${name}.${type}) o;`)
+      emit("        return")
+      for (let i = 0; i < fieldEntries.length; ++i) {
+        const [fieldName, fieldType] = fieldEntries[i]
+        const operator = i === 0 ? "" : "&& "
+        if (PRIMITIVE_TYPES.has(fieldType)) {
+          emit(`          ${operator}this.${fieldName} == that.${fieldName}`)
+        } else {
+          emit(`          ${operator}this.${fieldName}.equals(that.${fieldName})`)
+        }
       }
+      emit("          ;")
     }
-    emit("          ;")
     emit("      }")
     emit("      return false;")
     emit("    }")
@@ -114,11 +140,8 @@ const createSumType = (schema: Schema) => {
     // hashCode()
     emit("    @Override")
     emit("    public int hashCode() {")
-    emit(`      return java.util.Objects.hash(${hash(type)}`)
-    for (const fieldName of Object.keys(fields)) {
-      emit(`          , this.${fieldName}`)
-    }
-    emit("      );")
+    const hashCodeArgs = [`${hash(type)}`].concat(fieldNames.map((fieldName) => `this.${fieldName}`)).join(", ")
+    emit(`      return ${Objects()}.hash(${hashCodeArgs});`)
     emit("    }")
 
     emit("  }")
@@ -134,34 +157,30 @@ const createSumType = (schema: Schema) => {
       const typeName = typeNames[i]
       const nextMatching = i === typeNames.length - 1 ? "FinalMatching" : `Matching_${typeNames[i + 1]}`
       const previousTypeNames = typeNames.slice(0, i)
-      const params = previousTypeNames
-        .map((typeName) => `java.util.function.Function<${typeName}, T> ${typeName}_matcher`)
-        .join(", ")
+      const params = previousTypeNames.map((typeName) => `${Function()}<${typeName}, T> ${typeName}_matcher`).join(", ")
       const args = previousTypeNames
         .slice(0, i)
         .map((typeName) => `${typeName}_matcher`)
-        .concat(["java.util.Objects.requireNonNull(matcher)"])
+        .concat([`${Objects()}.requireNonNull(matcher)`])
         .join(", ")
       emit(`  public final class Matching_${typeName}<T> {`)
       for (const previousTypeName of previousTypeNames) {
-        emit(`    private final java.util.function.Function<${previousTypeName}, T> ${previousTypeName}_matcher;`)
+        emit(`    private final ${Function()}<${previousTypeName}, T> ${previousTypeName}_matcher;`)
       }
       emit(`    private Matching_${typeName}(${params}) {`)
       for (const previousTypeName of previousTypeNames) {
         emit(`      this.${previousTypeName}_matcher = ${previousTypeName}_matcher;`)
       }
       emit("    }")
-      emit(`    public ${nextMatching}<T> ${typeName}(java.util.function.Function<${typeName}, T> matcher) {`)
+      emit(`    public ${nextMatching}<T> ${typeName}(${Function()}<${typeName}, T> matcher) {`)
       emit(`      return new ${nextMatching}<T>(${args});`)
       emit("    }")
       emit("  }")
     }
-    const params = typeNames
-      .map((typeName) => `java.util.function.Function<${typeName}, T> ${typeName}_matcher`)
-      .join(", ")
+    const params = typeNames.map((typeName) => `${Function()}<${typeName}, T> ${typeName}_matcher`).join(", ")
     emit("  public final class FinalMatching<T> {")
     for (const typeName of typeNames) {
-      emit(`    private final java.util.function.Function<${typeName}, T> ${typeName}_matcher;`)
+      emit(`    private final ${Function()}<${typeName}, T> ${typeName}_matcher;`)
     }
     emit(`    private FinalMatching(${params}) {`)
     for (const typeName of typeNames) {
@@ -188,34 +207,30 @@ const createSumType = (schema: Schema) => {
       const typeName = typeNames[i]
       const nextVisiting = i === typeNames.length - 1 ? "FinalVisiting" : `Visiting_${typeNames[i + 1]}`
       const previousTypeNames = typeNames.slice(0, i)
-      const params = previousTypeNames
-        .map((typeName) => `java.util.function.Consumer<${typeName}> ${typeName}_visitor`)
-        .join(", ")
+      const params = previousTypeNames.map((typeName) => `${Consumer()}<${typeName}> ${typeName}_visitor`).join(", ")
       const args = previousTypeNames
         .slice(0, i)
         .map((typeName) => `${typeName}_visitor`)
-        .concat(["java.util.Objects.requireNonNull(visitor)"])
+        .concat([`${Objects()}.requireNonNull(visitor)`])
         .join(", ")
       emit(`  public final class Visiting_${typeName} {`)
       for (const previousTypeName of previousTypeNames) {
-        emit(`    private final java.util.function.Consumer<${previousTypeName}> ${previousTypeName}_visitor;`)
+        emit(`    private final ${Consumer()}<${previousTypeName}> ${previousTypeName}_visitor;`)
       }
       emit(`    private Visiting_${typeName}(${params}) {`)
       for (const previousTypeName of previousTypeNames) {
         emit(`      this.${previousTypeName}_visitor = ${previousTypeName}_visitor;`)
       }
       emit("    }")
-      emit(`    public ${nextVisiting} ${typeName}(java.util.function.Consumer<${typeName}> visitor) {`)
+      emit(`    public ${nextVisiting} ${typeName}(${Consumer()}<${typeName}> visitor) {`)
       emit(`      return new ${nextVisiting}(${args});`)
       emit("    }")
       emit("  }")
     }
-    const params = typeNames
-      .map((typeName) => `java.util.function.Consumer<${typeName}> ${typeName}_visitor`)
-      .join(", ")
+    const params = typeNames.map((typeName) => `${Consumer()}<${typeName}> ${typeName}_visitor`).join(", ")
     emit("  public final class FinalVisiting {")
     for (const typeName of typeNames) {
-      emit(`    private final java.util.function.Consumer<${typeName}> ${typeName}_visitor;`)
+      emit(`    private final ${Consumer()}<${typeName}> ${typeName}_visitor;`)
     }
     emit(`    private FinalVisiting(${params}) {`)
     for (const typeName of typeNames) {
@@ -236,7 +251,20 @@ const createSumType = (schema: Schema) => {
 
   emit("")
   emit(`}`)
-  return result
+
+  let header = ""
+  if (packageName !== undefined) {
+    header += `package ${packageName};\n\n`
+  }
+
+  if (imported.size > 0) {
+    for (const importedEntry of [...imported.values()].sort()) {
+      header += `import ${importedEntry};\n`
+    }
+    header += "\n"
+  }
+
+  return header + result
 }
 
 writeFileSync(
@@ -249,6 +277,7 @@ writeFileSync(
       Folder: {},
       Polder: {},
     },
+    imports: "all",
   }),
 )
 

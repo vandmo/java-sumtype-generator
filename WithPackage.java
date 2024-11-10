@@ -10,6 +10,7 @@ public abstract class WithPackage {
     return Folder;
   }
 
+  public final boolean is_Folder() { return this instanceof WithPackage.Folder; }
   public final static class Folder extends WithPackage {
     private Folder() {
     }

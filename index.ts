@@ -7,6 +7,19 @@ writeFileSync(
     name: "Integrity",
     types: {
       Calculated: { checksum: "String" },
+      Folder: {},
+      Ignored: {},
+    },
+    imports: "all",
+  }),
+)
+
+writeFileSync(
+  "IntegrityFlurp.java",
+  createSumType({
+    name: "IntegrityFlurp",
+    types: {
+      Calculated: { checksum: "String" },
       CalculatedX: { checksum: "String", flurp: "int" },
       Folder: {},
       Polder: {},

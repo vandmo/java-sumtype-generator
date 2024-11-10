@@ -77,6 +77,10 @@ export const createSumType = (schema: Schema) => {
     emit("")
   }
 
+  for (const type of Object.keys(types)) {
+    emit(`  public final boolean is_${type}() { return this instanceof ${name}.${type}; }`)
+  }
+
   for (const [type, fields] of Object.entries(types)) {
     const fieldNames = Object.keys(fields)
     const fieldEntries = Object.entries(fields)

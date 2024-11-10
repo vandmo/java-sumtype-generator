@@ -1,7 +1,7 @@
-public final class IntegrityTest {
+public final class IntegrityFlurpTest {
 
   public static void main(String[] args) {
-    Integrity i = Integrity.CalculatedX("hejhoj", 0);
+    IntegrityFlurp i = IntegrityFlurp.CalculatedX("hejhoj", 0);
     System.out.println(i);
     String s = i.<String>matching()
       .Calculated(c -> "c")
@@ -16,5 +16,7 @@ public final class IntegrityTest {
       .Folder(x -> System.out.println("f"))
       .Polder(x -> System.out.println("p"))
       .visit();
+    System.out.println(i.is_CalculatedX());
+    System.out.println(i.is_Folder());
   }
 }

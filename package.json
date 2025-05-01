@@ -1,5 +1,9 @@
 {
-  "dependencies": {
-    "@types/node": "^22.8.7"
+  "scripts": {
+    "compile": "rm -rf dist && tsc"
+  },
+  "devDependencies": {
+    "@types/node": "22.8.7",
+    "typescript": "5.8.3"
   }
 }

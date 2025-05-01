@@ -12,3 +12,4 @@ pom.xml.versionsBackup
 target/
 node_modules/
 /*.class
+/dist/

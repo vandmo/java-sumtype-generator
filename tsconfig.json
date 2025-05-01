@@ -1,17 +1,17 @@
 {
-    "compilerOptions": {
-      "esModuleInterop": true,
-      "skipLibCheck": true,
-      "target": "es2022",
-      "allowJs": true,
-      "strict": true,
-      "noUncheckedIndexedAccess": true,
-      "noImplicitOverride": true,
-      "module": "NodeNext",
-      "rootDirs": ["src"],
-      "outDir": "dist",
-      "sourceMap": true,
-      "lib": ["es2022"]
-    },
-    "exclude": ["dist/**", "tests/**"]
-  }
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "es2022",
+    "allowJs": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "module": "NodeNext",
+    "rootDirs": ["src"],
+    "outDir": "dist",
+    "sourceMap": true,
+    "lib": ["es2022"]
+  },
+  "exclude": ["dist/**", "tests/**"]
+}

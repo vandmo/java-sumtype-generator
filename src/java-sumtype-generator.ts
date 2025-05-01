@@ -36,7 +36,7 @@ export const createSumType = (schema: Schema) => {
     Function = () => "java.util.function.Function"
     Objects = () => "java.util.Objects"
   } else if (imports === "all") {
-    const makeImporter = (P, S) => {
+    const makeImporter = (P: string, S: string) => {
       return () => {
         imported.add(`${P}.${S}`)
         return S
@@ -125,8 +125,7 @@ export const createSumType = (schema: Schema) => {
     } else {
       emit(`        ${name}.${type} that = (${name}.${type}) o;`)
       emit("        return")
-      for (let i = 0; i < fieldEntries.length; ++i) {
-        const [fieldName, fieldType] = fieldEntries[i]
+      for (const [i, [fieldName, fieldType]] of fieldEntries.entries()) {
         const operator = i === 0 ? "" : "&& "
         if (PRIMITIVE_TYPES.has(fieldType)) {
           emit(`          ${operator}this.${fieldName} == that.${fieldName}`)

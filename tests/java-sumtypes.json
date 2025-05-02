@@ -2,7 +2,7 @@
   "java-sumtypes": [
     {
       "name": "Tree",
-      "packageName": "se.vandmo.javasumtypes",
+      "package-name": "se.vandmo.javasumtypes",
       "types": {
         "Empty": {},
         "Leaf": { "value": "int" },
@@ -31,7 +31,7 @@
     },
     {
       "name": "WithPackage",
-      "packageName": "se.vandmo.javasumtypes",
+      "package-name": "se.vandmo.javasumtypes",
       "types": {
         "Folder": {}
       }

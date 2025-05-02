@@ -1,13 +1,15 @@
-import { command, run, string, positional } from "cmd-ts"
+import { readFileSync, writeFileSync } from "node:fs"
+import { createSumType } from "./java-sumtype-generator.js"
 
-const app = command({
-  name: "java-sumtype-generator",
-  args: {
-    config: positional({ type: string, displayName: "configFile" }),
-  },
-  handler: ({ configFile }) => {
-    console.log({ configFile })
-  },
-})
+const config = JSON.parse(readFileSync("java-sumtypes.json", "utf8"))
 
-run(app, process.argv.slice(2))
+writeFileSync(
+  "WithPackage.java",
+  createSumType({
+    packageName: "se.vandmo.javasumtypes",
+    name: "WithPackage",
+    types: {
+      Folder: {},
+    },
+  }),
+)

@@ -1,0 +1,44 @@
+{
+  "java-sumtypes": [
+    {
+      "name": "Tree",
+      "packageName": "se.vandmo.javasumtypes",
+      "types": {
+        "Empty": {},
+        "Leaf": { "value": "int" },
+        "Node": { "left": "Tree", "right": "Tree", "value": "int" }
+      },
+      "imports": "all"
+    },
+    {
+      "name": "Integrity",
+      "types": {
+        "Calculated": { "checksum": "String" },
+        "Folder": {},
+        "Ignored": {}
+      },
+      "imports": "all"
+    },
+    {
+      "name": "IntegrityFlurp",
+      "types": {
+        "Calculated": { "checksum": "String" },
+        "CalculatedX": { "checksum": "String", "flurp": "int" },
+        "Folder": {},
+        "Polder": {}
+      },
+      "imports": "all"
+    },
+    {
+      "name": "WithPackage",
+      "packageName": "se.vandmo.javasumtypes",
+      "types": {
+        "Folder": {}
+      }
+    },
+    {
+      "name": "NoTypes",
+      "types": {}
+    }
+  ]
+}

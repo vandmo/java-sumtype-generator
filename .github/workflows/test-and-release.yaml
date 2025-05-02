@@ -1,0 +1,80 @@
+name: Test and Release
+on: [push, pull_request]
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - uses: ludeeus/action-shellcheck@master
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        id: docker_build
+        uses: docker/build-push-action@v5
+        with:
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: the-image
+
+      - run: cd tests && docker run --rm -v "${PWD}":/work --user $(id -u):$(id -g) the-image
+
+  release:
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/release-')
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Set Versions
+        uses: actions/github-script@v7
+        id: set_version
+        with:
+          script: |
+            const tag = context.ref.substring(10)
+            const no_release = tag.replace('release-', '')
+            const dash_index = no_release.lastIndexOf('-')
+            const no_dash = (dash_index > -1) ?  no_release.substring(0, dash_index) : no_release
+            const parts = no_dash.split('.')
+            if (parts.length != 3) {
+              throw new Error(`Unexpected version ${no_dash}`)
+            }
+            const major = parts[0]
+            const minor = parts[1]
+            const subminor = parts[2]
+            core.setOutput('major', major)
+            core.setOutput('major-minor', `${major}.${minor}`)
+            core.setOutput('major-minor-subminor', `${major}.${minor}.${subminor}`)
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{secrets.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          platforms: linux/arm64,linux/amd64
+          tags: |
+            ${{secrets.DOCKERHUB_USERNAME}}/java-sumtype-generator:latest
+            ${{secrets.DOCKERHUB_USERNAME}}/java-sumtype-generator:${{steps.set_version.outputs.major}}
+            ${{secrets.DOCKERHUB_USERNAME}}/java-sumtype-generator:${{steps.set_version.outputs.major-minor}}
+            ${{secrets.DOCKERHUB_USERNAME}}/java-sumtype-generator:${{steps.set_version.outputs.major-minor-subminor}}

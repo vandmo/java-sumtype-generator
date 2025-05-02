@@ -5,13 +5,15 @@ Java, unlike for example [Scala](https://docs.scala-lang.org/scala3/reference/en
 This tool generates Java classes that emulates sum types based on a description of those types.
 
 ## An Example
+
 Given the following `java-sumtypes.json`:
+
 ```json
 {
   "java-sumtypes": [
     {
       "name": "Tree",
-      "packageName": "se.vandmo.javasumtypes",
+      "package-name": "se.vandmo.javasumtypes",
       "types": {
         "Empty": {},
         "Leaf": { "value": "int" },
@@ -24,14 +26,16 @@ Given the following `java-sumtypes.json`:
 ```
 
 Four classes will be generated:
-* `Tree`, the sum type representing any one of the possible types
-* `Tree.Empty`, a class with only a single value
-* `Tree.Leaf`, a class with an integer value
-* `Tree.Node`, a class with an integer value and two `Tree` values
+
+- `Tree`, the sum type representing any one of the possible types
+- `Tree.Empty`, a class with only a single value
+- `Tree.Leaf`, a class with an integer value
+- `Tree.Node`, a class with an integer value and two `Tree` values
 
 Each class will have implementations of `toString`, `equals` and `hashCode` among with fluent APIs for `matching` and `visiting`.
 
 The classes can then be used like this.
+
 ```java
 IntegrityFlurp i = Tree.Leaf(0);
 System.out.println(i);
@@ -52,10 +56,12 @@ System.out.println(i.is_Node());
 ```
 
 ## Usage
+
 Create a `java-symtypes.json` and run:
 `docker run --rm -v "${PWD}":/work --user $(id -u):$(id -g) vandmo/java-sumtype-generator`
 
 This should create the files you need in the correct locations under `src/main/java`.
 
 ## Limitations
+
 The sum type can only consist of sub classes of itself, although it should be possible to allow for externally definied types.

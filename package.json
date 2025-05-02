@@ -7,8 +7,5 @@
     "@types/node": "22.8.7",
     "prettier": "3.5.3",
     "typescript": "5.8.3"
-  },
-  "dependencies": {
-    "cmd-ts": "0.13.0"
   }
 }

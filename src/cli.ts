@@ -42,6 +42,7 @@ if ("java-sumtypes" in config) {
         packageName,
         name: sumType.name,
         types: sumType.types,
+        imports: sumType.imports,
       }),
     )
   }
